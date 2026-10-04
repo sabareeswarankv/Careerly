@@ -25,9 +25,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _cgpaController;
   late TextEditingController _careerGoalController;
 
-  String _degree = AppConstants.degrees.first;
-  String _department = AppConstants.departments.first;
-  int _semester = 5;
+  String? _degree;
+  String? _department;
+  int? _semester;
 
   List<String> _skills = [];
   List<String> _nonTechnicalSkills = [];
@@ -51,10 +51,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         text: profile?.email ?? authUser?.email ?? '',
       );
       _cgpaController = TextEditingController(
-        text: (profile != null && profile.cgpa > 0) ? profile.cgpa.toString() : '8.0',
+        text: (profile != null && profile.cgpa > 0) ? profile.cgpa.toString() : '',
       );
       _careerGoalController = TextEditingController(
-        text: profile?.careerGoal ?? 'Software Engineer',
+        text: profile?.careerGoal ?? '',
       );
 
       if (profile != null) {
@@ -64,15 +64,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         if (AppConstants.departments.contains(profile.department)) {
           _department = profile.department;
         }
-        _semester = profile.semester;
+        if (profile.semester > 0) {
+          _semester = profile.semester;
+        }
         _skills = List<String>.from(profile.skills);
         _nonTechnicalSkills = List<String>.from(profile.nonTechnicalSkills);
         _interests = List<String>.from(profile.interests);
         _preferredRoles = List<String>.from(profile.preferredRoles);
         _improvementAreas = List<String>.from(profile.improvementAreas);
-      } else {
-        _skills = ['Python', 'SQL', 'Data Structures'];
-        _interests = ['Artificial Intelligence', 'Web Development'];
       }
 
       _initialized = true;
@@ -95,15 +94,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final authUser = context.read<AuthProvider>().user;
     if (authUser == null) return;
 
-    final double parsedCgpa = double.tryParse(_cgpaController.text.trim()) ?? 8.0;
+    if (_degree == null || _degree!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select your degree.')),
+      );
+      return;
+    }
+
+    if (_department == null || _department!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select your department.')),
+      );
+      return;
+    }
+
+    if (_semester == null || _semester! < 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select your current semester.')),
+      );
+      return;
+    }
+
+    final double? parsedCgpa = double.tryParse(_cgpaController.text.trim());
+    if (parsedCgpa == null || parsedCgpa < 0.0 || parsedCgpa > 10.0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid CGPA between 0.0 and 10.0.')),
+      );
+      return;
+    }
 
     final updated = StudentProfile(
       uid: authUser.uid,
       fullName: _nameController.text.trim(),
       email: _emailController.text.trim(),
-      degree: _degree,
-      department: _department,
-      semester: _semester,
+      degree: _degree!,
+      department: _department!,
+      semester: _semester!,
       cgpa: parsedCgpa,
       skills: _skills,
       nonTechnicalSkills: _nonTechnicalSkills,
@@ -186,6 +212,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   const SizedBox(height: 6),
                                   DropdownButtonFormField<String>(
                                     initialValue: _degree,
+                                    hint: const Text('Select Degree', style: TextStyle(fontSize: 14, color: AppTheme.slate400)),
                                     isExpanded: true,
                                     decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12)),
                                     items: AppConstants.degrees
@@ -214,6 +241,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   const SizedBox(height: 6),
                                   DropdownButtonFormField<int>(
                                     initialValue: _semester,
+                                    hint: const Text('Semester', style: TextStyle(fontSize: 14, color: AppTheme.slate400)),
                                     isExpanded: true,
                                     decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12)),
                                     items: List.generate(8, (i) => i + 1)
@@ -247,6 +275,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   const SizedBox(height: 6),
                                   DropdownButtonFormField<String>(
                                     initialValue: _department,
+                                    hint: const Text('Select Department', style: TextStyle(fontSize: 14, color: AppTheme.slate400)),
                                     isExpanded: true,
                                     decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12)),
                                     items: AppConstants.departments

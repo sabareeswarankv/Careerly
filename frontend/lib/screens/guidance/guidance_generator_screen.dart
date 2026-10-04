@@ -25,6 +25,25 @@ class _GuidanceGeneratorScreenState extends State<GuidanceGeneratorScreen> {
     final profile = profileProvider.profile;
     if (profile == null) return;
 
+    if (profile.degree.isEmpty || profile.department.isEmpty || profile.semester < 1 || profile.cgpa <= 0.0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please complete your degree, department, semester, and CGPA in Edit Profile.'),
+          action: SnackBarAction(
+            label: 'Edit Profile',
+            textColor: Colors.white,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+              );
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
     if (profile.careerGoal.isEmpty && profile.skills.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -125,19 +144,23 @@ class _GuidanceGeneratorScreenState extends State<GuidanceGeneratorScreen> {
                           const Divider(height: 20),
                           _ProfileItem(
                             label: 'Degree & Semester',
-                            value: profile != null
+                            value: (profile != null && profile.degree.isNotEmpty && profile.semester > 0)
                                 ? '${profile.degree} (Semester ${profile.semester})'
                                 : 'Not specified',
                           ),
                           const SizedBox(height: 10),
                           _ProfileItem(
                             label: 'Department',
-                            value: profile?.department ?? 'Not specified',
+                            value: (profile != null && profile.department.isNotEmpty)
+                                ? profile.department
+                                : 'Not specified',
                           ),
                           const SizedBox(height: 10),
                           _ProfileItem(
                             label: 'Current CGPA',
-                            value: profile != null ? profile.cgpa.toStringAsFixed(1) : 'Not specified',
+                            value: (profile != null && profile.cgpa > 0.0)
+                                ? profile.cgpa.toStringAsFixed(2)
+                                : 'Not specified',
                           ),
                           const SizedBox(height: 10),
                           _ProfileItem(

@@ -4,10 +4,8 @@ import '../../config/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../providers/guidance_provider.dart';
-import '../../services/storage_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_text_field.dart';
-import '../../widgets/password_reset_dialog.dart';
 import '../../widgets/state_views.dart';
 import '../home/main_navigation_screen.dart';
 
@@ -24,8 +22,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _answerController = TextEditingController();
-  String _selectedQuestion = kSecurityQuestions.first;
   bool _obscurePassword = true;
 
   @override
@@ -34,7 +30,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _answerController.dispose();
     super.dispose();
   }
 
@@ -49,13 +44,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     if (success && mounted) {
-      if (_answerController.text.trim().isNotEmpty) {
-        StorageService().saveSecurityQuestion(
-          _emailController.text,
-          _selectedQuestion,
-          _answerController.text.trim(),
-        );
-      }
       final user = authProvider.user!;
       Navigator.pushAndRemoveUntil(
         context,
@@ -212,65 +200,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       }
                       return null;
                     },
-                  ),
-                  const SizedBox(height: 16),
-
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: AppTheme.slate100.withAlpha(120),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppTheme.slate200),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: const [
-                            Icon(Icons.shield_outlined, size: 16, color: AppTheme.primary),
-                            SizedBox(width: 8),
-                            Text(
-                              'Security Question (For Password Recovery)',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.slate700,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: AppTheme.slate200),
-                          ),
-                          child: DropdownButton<String>(
-                            value: _selectedQuestion,
-                            isExpanded: true,
-                            underline: const SizedBox(),
-                            items: kSecurityQuestions
-                                .map((q) => DropdownMenuItem(
-                                      value: q,
-                                      child: Text(q, style: const TextStyle(fontSize: 12)),
-                                    ))
-                                .toList(),
-                            onChanged: (val) {
-                              if (val != null) setState(() => _selectedQuestion = val);
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        AppTextField(
-                          label: 'Secret Answer',
-                          hint: 'Answer to verify your identity',
-                          controller: _answerController,
-                          prefixIcon: const Icon(Icons.key_outlined, size: 18, color: AppTheme.slate400),
-                        ),
-                      ],
-                    ),
                   ),
                   const SizedBox(height: 24),
 
