@@ -279,16 +279,21 @@ class HomeScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      hasGuidance
-                          ? 'Target: ${activeGuidance.careerRecommendation.title}'
-                          : 'Profile Completion',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.slate900,
+                    Expanded(
+                      child: Text(
+                        hasGuidance
+                            ? 'Target: ${activeGuidance.careerRecommendation.title}'
+                            : 'Profile Completion',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.slate900,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
