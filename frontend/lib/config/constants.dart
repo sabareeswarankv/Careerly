@@ -4,7 +4,7 @@ class AppConstants {
 
   static const String defaultApiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:8000',
+    defaultValue: 'https://careerly-b2ql.onrender.com',
   );
 
   static const List<String> degrees = [
